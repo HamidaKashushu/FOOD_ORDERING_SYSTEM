@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Ordering System - Delicious Meals Delivered</title>
+  <meta name="description" content="Order your favorite meals quickly and easily from local restaurants."/>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- Google Fonts (optional but recommended for professional look) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo">
+        <h1>Foodie<span>Hub</span></h1>
+      </div>
+
+      <nav class="main-nav">
+        <ul>
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+          <li><a href="orders.html">Orders</a></li>
+          <li><a href="login.html" id="auth-link">Login / Register</a></li>
+        </ul>
+      </nav>
+
+      <button class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h2>Order Delicious Food Now</h2>
+        <p>Fast delivery • Wide variety • Best prices</p>
+      </div>
+    </section>
+
+    <!-- Filters & Search -->
+    <section class="filters-section">
+      <div class="container">
+        <div class="filters">
+          <div class="search-container">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search for food..." 
+              aria-label="Search food items"
+            >
+            <button id="search-btn">Search</button>
+          </div>
+
+          <div class="category-filter">
+            <label for="category-select">Category:</label>
+            <select id="category-select">
+              <option value="">All Categories</option>
+              <!-- Categories will be populated dynamically -->
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Food Grid -->
+    <section class="foods-section">
+      <div class="container">
+        <h2>Our Menu</h2>
+        
+        <div class="loading" id="foods-loading">Loading delicious meals...</div>
+        <div class="error-message" id="foods-error" style="display:none;"></div>
+        
+        <div class="food-grid" id="food-grid">
+          <!-- Food cards will be inserted here dynamically -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 FoodieHub. All rights reserved.</p>
+      <p>Dar es Salaam, Tanzania • contact@foodiehub.co.tz</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Files -->
+  <script type="module">
+    // Import utilities & API modules
+    import { API_BASE } from './assets/js/config.js';
+    import { validateNotEmpty, formatPrice, showMessage } from './assets/js/utils.js';
+    import { isLoggedIn, getCurrentUser, logoutUser } from './assets/js/auth.js';
+    import { getAllFoods, getCategories } from './assets/js/foods.js';
+    import { addItemToCart, getCart } from './assets/js/cart.js';
+
+    // ────────────────────────────────────────────────
+    // Global state
+    // ────────────────────────────────────────────────
+    let currentUser = null;
+    let cartCount = 0;
+
+    // ────────────────────────────────────────────────
+    // DOM Elements
+    // ────────────────────────────────────────────────
+    const foodGrid       = document.getElementById('food-grid');
+    const categorySelect = document.getElementById('category-select');
+    const searchInput    = document.getElementById('search-input');
+    const searchBtn      = document.getElementById('search-btn');
+    const cartCountEl    = document.getElementById('cart-count');
+    const authLink       = document.getElementById('auth-link');
+    const loadingEl      = document.getElementById('foods-loading');
+    const errorEl        = document.getElementById('foods-error');
+
+    // ────────────────────────────────────────────────
+    // Check authentication status
+    // ────────────────────────────────────────────────
+    function updateAuthUI() {
+      currentUser = getCurrentUser();
+      if (isLoggedIn()) {
+        authLink.textContent = `Hello, ${currentUser.full_name.split(' ')[0]}`;
+        authLink.href = "#";
+        authLink.onclick = (e) => {
+          e.preventDefault();
+          if (confirm('Logout?')) {
+            logoutUser('login.html');
+          }
+        };
+        loadCartCount();
+      } else {
+        authLink.textContent = 'Login / Register';
+        authLink.href = 'login.html';
+        authLink.onclick = null;
+        cartCountEl.textContent = '0';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load & display categories
+    // ────────────────────────────────────────────────
+    async function loadCategories() {
+      try {
+        const res = await getCategories();
+        if (res.success && res.data.length > 0) {
+          res.data.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.category_id;
+            option.textContent = cat.category_name;
+            categorySelect.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load & render foods
+    // ────────────────────────────────────────────────
+    async function loadFoods(search = '', category = null) {
+      foodGrid.innerHTML = '';
+      loadingEl.style.display = 'block';
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await getAllFoods(search, category);
+        loadingEl.style.display = 'none';
+
+        if (res.success && res.data.length > 0) {
+          res.data.forEach(food => {
+            const card = document.createElement('article');
+            card.className = 'food-card';
+            card.innerHTML = `
+              <div class="food-image">
+                <img src="${food.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                     alt="${food.food_name}" loading="lazy">
+              </div>
+              <div class="food-info">
+                <h3>${food.food_name}</h3>
+                <p class="food-desc">${food.description || 'No description available'}</p>
+                <div class="food-footer">
+                  <span class="price">${formatPrice(food.price)}</span>
+                  <button class="btn-add-cart" 
+                          data-food-id="${food.food_id}"
+                          data-price="${food.price}">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            `;
+            foodGrid.appendChild(card);
+          });
+
+          // Attach event listeners to "Add to Cart" buttons
+          document.querySelectorAll('.btn-add-cart').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              if (!isLoggedIn()) {
+                showMessage('Please login to add items to cart', 'error');
+                return;
+              }
+              const foodId = parseInt(btn.dataset.foodId);
+              const price = parseFloat(btn.dataset.price);
+              try {
+                await addItemToCart(currentUser.id, foodId, 1);
+                loadCartCount();
+              } catch (err) {
+                // error already shown in addItemToCart
+              }
+            });
+          });
+        } else {
+          foodGrid.innerHTML = '<p class="no-results">No foods found matching your criteria.</p>';
+        }
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        errorEl.textContent = 'Failed to load menu. Please try again later.';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load cart count
+    // ────────────────────────────────────────────────
+    async function loadCartCount() {
+      if (!isLoggedIn()) return;
+      try {
+        const cartData = await getCart(currentUser.id);
+        if (cartData.success && cartData.data.items) {
+          const count = cartData.data.items.reduce((sum, item) => sum + item.quantity, 0);
+          cartCountEl.textContent = count;
+        }
+      } catch (err) {
+        cartCountEl.textContent = '0';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Event Listeners
+    // ────────────────────────────────────────────────
+    searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.trim();
+      const category = categorySelect.value ? parseInt(categorySelect.value) : null;
+      loadFoods(searchTerm, category);
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchBtn.click();
+      }
+    });
+
+    categorySelect.addEventListener('change', () => {
+      const searchTerm = searchInput.value.trim();
+      const category = categorySelect.value ? parseInt(categorySelect.value) : null;
+      loadFoods(searchTerm, category);
+    });
+
+    // Mobile menu toggle
+    document.querySelector('.mobile-menu-toggle')?.addEventListener('click', () => {
+      document.querySelector('.main-nav')?.classList.toggle('active');
+    });
+
+    // ────────────────────────────────────────────────
+    // Initialize
+    // ────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAuthUI();
+      loadCategories();
+      loadFoods();          // initial load - all foods
+      loadCartCount();
+    });
+  </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Food Ordering System - Delicious Meals Delivered</title>
+  <meta name="description" content="Order your favorite meals quickly and easily from local restaurants."/>
+  
+  <!-- External CSS -->
+  <link rel="stylesheet" href="assets/css/style.css">
+  
+  <!-- Google Fonts (optional but recommended for professional look) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Header / Navigation -->
+  <header class="header">
+    <div class="container header-container">
+      <div class="logo">
+        <h1>Foodie<span>Hub</span></h1>
+      </div>
+
+      <nav class="main-nav">
+        <ul>
+          <li><a href="index.html" class="active">Home</a></li>
+          <li><a href="cart.html">Cart (<span id="cart-count">0</span>)</a></li>
+          <li><a href="orders.html">Orders</a></li>
+          <li><a href="login.html" id="auth-link">Login / Register</a></li>
+        </ul>
+      </nav>
+
+      <button class="mobile-menu-toggle" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="container">
+        <h2>Order Delicious Food Now</h2>
+        <p>Fast delivery • Wide variety • Best prices</p>
+      </div>
+    </section>
+
+    <!-- Filters & Search -->
+    <section class="filters-section">
+      <div class="container">
+        <div class="filters">
+          <div class="search-container">
+            <input 
+              type="text" 
+              id="search-input" 
+              placeholder="Search for food..." 
+              aria-label="Search food items"
+            >
+            <button id="search-btn">Search</button>
+          </div>
+
+          <div class="category-filter">
+            <label for="category-select">Category:</label>
+            <select id="category-select">
+              <option value="">All Categories</option>
+              <!-- Categories will be populated dynamically -->
+            </select>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Food Grid -->
+    <section class="foods-section">
+      <div class="container">
+        <h2>Our Menu</h2>
+        
+        <div class="loading" id="foods-loading">Loading delicious meals...</div>
+        <div class="error-message" id="foods-error" style="display:none;"></div>
+        
+        <div class="food-grid" id="food-grid">
+          <!-- Food cards will be inserted here dynamically -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <p>&copy; 2025 FoodieHub. All rights reserved.</p>
+      <p>Dar es Salaam, Tanzania • contact@foodiehub.co.tz</p>
+    </div>
+  </footer>
+
+  <!-- JavaScript Files -->
+  <script type="module">
+    // Import utilities & API modules
+    import { API_BASE } from './assets/js/config.js';
+    import { validateNotEmpty, formatPrice, showMessage } from './assets/js/utils.js';
+    import { isLoggedIn, getCurrentUser, logoutUser } from './assets/js/auth.js';
+    import { getAllFoods, getCategories } from './assets/js/foods.js';
+    import { addItemToCart, getCart } from './assets/js/cart.js';
+
+    // ────────────────────────────────────────────────
+    // Global state
+    // ────────────────────────────────────────────────
+    let currentUser = null;
+    let cartCount = 0;
+
+    // ────────────────────────────────────────────────
+    // DOM Elements
+    // ────────────────────────────────────────────────
+    const foodGrid       = document.getElementById('food-grid');
+    const categorySelect = document.getElementById('category-select');
+    const searchInput    = document.getElementById('search-input');
+    const searchBtn      = document.getElementById('search-btn');
+    const cartCountEl    = document.getElementById('cart-count');
+    const authLink       = document.getElementById('auth-link');
+    const loadingEl      = document.getElementById('foods-loading');
+    const errorEl        = document.getElementById('foods-error');
+
+    // ────────────────────────────────────────────────
+    // Check authentication status
+    // ────────────────────────────────────────────────
+    function updateAuthUI() {
+      currentUser = getCurrentUser();
+      if (isLoggedIn()) {
+        authLink.textContent = `Hello, ${currentUser.full_name.split(' ')[0]}`;
+        authLink.href = "#";
+        authLink.onclick = (e) => {
+          e.preventDefault();
+          if (confirm('Logout?')) {
+            logoutUser('login.html');
+          }
+        };
+        loadCartCount();
+      } else {
+        authLink.textContent = 'Login / Register';
+        authLink.href = 'login.html';
+        authLink.onclick = null;
+        cartCountEl.textContent = '0';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load & display categories
+    // ────────────────────────────────────────────────
+    async function loadCategories() {
+      try {
+        const res = await getCategories();
+        if (res.success && res.data.length > 0) {
+          res.data.forEach(cat => {
+            const option = document.createElement('option');
+            option.value = cat.category_id;
+            option.textContent = cat.category_name;
+            categorySelect.appendChild(option);
+          });
+        }
+      } catch (err) {
+        console.error('Failed to load categories:', err);
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load & render foods
+    // ────────────────────────────────────────────────
+    async function loadFoods(search = '', category = null) {
+      foodGrid.innerHTML = '';
+      loadingEl.style.display = 'block';
+      errorEl.style.display = 'none';
+
+      try {
+        const res = await getAllFoods(search, category);
+        loadingEl.style.display = 'none';
+
+        if (res.success && res.data.length > 0) {
+          res.data.forEach(food => {
+            const card = document.createElement('article');
+            card.className = 'food-card';
+            card.innerHTML = `
+              <div class="food-image">
+                <img src="${food.image_url || 'https://via.placeholder.com/300x200?text=No+Image'}" 
+                     alt="${food.food_name}" loading="lazy">
+              </div>
+              <div class="food-info">
+                <h3>${food.food_name}</h3>
+                <p class="food-desc">${food.description || 'No description available'}</p>
+                <div class="food-footer">
+                  <span class="price">${formatPrice(food.price)}</span>
+                  <button class="btn-add-cart" 
+                          data-food-id="${food.food_id}"
+                          data-price="${food.price}">
+                    Add to Cart
+                  </button>
+                </div>
+              </div>
+            `;
+            foodGrid.appendChild(card);
+          });
+
+          // Attach event listeners to "Add to Cart" buttons
+          document.querySelectorAll('.btn-add-cart').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              if (!isLoggedIn()) {
+                showMessage('Please login to add items to cart', 'error');
+                return;
+              }
+              const foodId = parseInt(btn.dataset.foodId);
+              const price = parseFloat(btn.dataset.price);
+              try {
+                await addItemToCart(currentUser.id, foodId, 1);
+                loadCartCount();
+              } catch (err) {
+                // error already shown in addItemToCart
+              }
+            });
+          });
+        } else {
+          foodGrid.innerHTML = '<p class="no-results">No foods found matching your criteria.</p>';
+        }
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        errorEl.textContent = 'Failed to load menu. Please try again later.';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Load cart count
+    // ────────────────────────────────────────────────
+    async function loadCartCount() {
+      if (!isLoggedIn()) return;
+      try {
+        const cartData = await getCart(currentUser.id);
+        if (cartData.success && cartData.data.items) {
+          const count = cartData.data.items.reduce((sum, item) => sum + item.quantity, 0);
+          cartCountEl.textContent = count;
+        }
+      } catch (err) {
+        cartCountEl.textContent = '0';
+      }
+    }
+
+    // ────────────────────────────────────────────────
+    // Event Listeners
+    // ────────────────────────────────────────────────
+    searchBtn.addEventListener('click', () => {
+      const searchTerm = searchInput.value.trim();
+      const category = categorySelect.value ? parseInt(categorySelect.value) : null;
+      loadFoods(searchTerm, category);
+    });
+
+    searchInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        searchBtn.click();
+      }
+    });
+
+    categorySelect.addEventListener('change', () => {
+      const searchTerm = searchInput.value.trim();
+      const category = categorySelect.value ? parseInt(categorySelect.value) : null;
+      loadFoods(searchTerm, category);
+    });
+
+    // Mobile menu toggle
+    document.querySelector('.mobile-menu-toggle')?.addEventListener('click', () => {
+      document.querySelector('.main-nav')?.classList.toggle('active');
+    });
+
+    // ────────────────────────────────────────────────
+    // Initialize
+    // ────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      updateAuthUI();
+      loadCategories();
+      loadFoods();          // initial load - all foods
+      loadCartCount();
+    });
+  </script>
+</body>
+</html>
