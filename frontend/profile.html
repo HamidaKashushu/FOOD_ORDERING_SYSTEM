@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Manage your profile and addresses - Food Ordering System">
+    <title>Profile - Food Ordering System</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="assets/images/favicon.png">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/profile.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="container header-container">
+            <div class="logo">
+                <a href="index.html">
+                    <img src="assets/images/logo.png" alt="Logo" class="logo-img">
+                    <span class="logo-text">D FOOD</span>
+                </a>
+            </div>
+
+            <nav class="navbar">
+                <ul class="nav-menu">
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="menu.html">Menu</a></li>
+                    <li><a href="cart.html">Cart</a></li>
+                    <li><a href="orders.html">Orders</a></li>
+                    <li><a href="profile.html" class="active">Profile</a></li>
+                </ul>
+
+                <div class="auth-buttons">
+                    <button class="btn btn-danger logout-btn" id="logoutBtn" style="display: none;">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content profile-page">
+        <div class="container">
+            <h1 class="page-title">My Profile</h1>
+
+            <div class="profile-grid">
+                <!-- Personal Information -->
+                <section class="profile-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>Personal Information</h2>
+                        </div>
+
+                        <form id="profileForm" class="profile-form">
+                            <div class="form-group">
+                                <label for="fullName">Full Name</label>
+                                <input type="text" id="fullName" name="full_name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" readonly>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span>Update Profile</span>
+                                <span class="loading-text" style="display: none;">Updating...</span>
+                            </button>
+                        </form>
+
+                        <div id="profileMessage" class="message-area" role="alert"></div>
+                    </div>
+                </section>
+
+                <!-- Addresses -->
+                <section class="addresses-section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h2>My Addresses</h2>
+                            <button class="btn btn-outline btn-sm" id="addAddressBtn">
+                                <i class="fas fa-plus"></i> Add New Address
+                            </button>
+                        </div>
+
+                        <div class="addresses-list" id="addressesList">
+                            <div class="loading">Loading addresses...</div>
+                        </div>
+
+                        <!-- Add/Edit Address Form -->
+                        <form id="addressForm" class="address-form" style="display: none;">
+                            <input type="hidden" id="addressId" name="id">
+
+                            <div class="form-group">
+                                <label for="addressFullName">Full Name</label>
+                                <input type="text" id="addressFullName" name="full_name" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="addressPhone">Phone Number</label>
+                                <input type="tel" id="addressPhone" name="phone" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="street">Street Address</label>
+                                <input type="text" id="street" name="street" required>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="city">City</label>
+                                    <input type="text" id="city" name="city" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="region">Region</label>
+                                    <input type="text" id="region" name="region">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="notes">Delivery Notes (optional)</label>
+                                <textarea id="notes" name="notes" rows="2"></textarea>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn btn-primary">Save Address</button>
+                                <button type="button" class="btn btn-outline" id="cancelAddressBtn">Cancel</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>D FOOD</h3>
+                    <p>Fast & reliable food delivery in Dar es Salaam</p>
+                </div>
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="menu.html">Menu</a></li>
+                        <li><a href="cart.html">Cart</a></li>
+                        <li><a href="orders.html">Orders</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Contact</h4>
+                    <ul>
+                        <li><i class="fas fa-phone"></i> +255 123 456 789</li>
+                        <li><i class="fas fa-envelope"></i> support@dfood.co.tz</li>
+                        <li><i class="fas fa-map-marker-alt"></i> Dar es Salaam, Tanzania</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>© <?php echo date('Y'); ?> D FOOD. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/config/api.js"></script>
+    <script src="js/utils/fetch.js"></script>
+    <script src="js/utils/storage.js"></script>
+    <script src="js/utils/auth.js"></script>
+    <script src="js/profile/profile.js"></script>
+</body>
+</html>
