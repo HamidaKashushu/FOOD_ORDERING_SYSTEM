@@ -16,7 +16,7 @@ require_once __DIR__ . '/../config/database.php';
 
 class Payment
 {
-    private PDO $db;
+    public PDO $db;
 
     /**
      * Constructor - injects or obtains PDO connection
@@ -185,6 +185,40 @@ class Payment
         }
 
         return $txId;
+    }
+
+    function getAll(): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT p.*, o.order_number, u.full_name, u.email
+            FROM payments p
+            JOIN orders o ON p.order_id = o.id
+            JOIN users u ON p.user_id = u.id
+            ORDER BY p.created_at DESC
+        ");
+
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    function getUserPaymentsInRange(int $userId, string $start, string $end): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT p.*, o.order_number
+            FROM payments p
+            JOIN orders o ON p.order_id = o.id
+            WHERE p.user_id = :user_id
+              AND DATE(p.created_at) BETWEEN :start AND :end
+            ORDER BY p.created_at DESC
+        ");
+
+        $stmt->execute([
+            ':user_id' => $userId,
+            ':start'   => $start,
+            ':end'     => $end
+        ]);
+
+        return $stmt->fetchAll();
     }
 
     /*

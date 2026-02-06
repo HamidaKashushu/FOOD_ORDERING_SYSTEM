@@ -107,7 +107,7 @@ class CartController
                 'message' => 'Item added to cart',
                 'cart'    => $updatedCart,
                 'total'   => $total
-            ], 201);
+            ], 'Item added to cart', 201);
         }
 
         Response::error('Failed to add item to cart', 500);

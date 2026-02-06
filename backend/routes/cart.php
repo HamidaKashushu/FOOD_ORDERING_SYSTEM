@@ -31,7 +31,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->get('/', Middleware::run(
         $protected,
-        [CartController::class, 'getCart']
+        CartController::class,
+        'getCart'
     ));
 
     /**
@@ -41,7 +42,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->post('/add', Middleware::run(
         $protected,
-        [CartController::class, 'addItem']
+        CartController::class,
+        'addItem'
     ));
 
     /**
@@ -51,7 +53,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->put('/update', Middleware::run(
         $protected,
-        [CartController::class, 'updateItem']
+        CartController::class,
+        'updateItem'
     ));
 
     /**
@@ -61,7 +64,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->delete('/remove', Middleware::run(
         $protected,
-        [CartController::class, 'removeItem']
+        CartController::class,
+        'removeItem'
     ));
 
     /**
@@ -70,7 +74,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->delete('/clear', Middleware::run(
         $protected,
-        [CartController::class, 'clearCart']
+        CartController::class,
+        'clearCart'
     ));
 
     /**
@@ -79,7 +84,8 @@ $router->group('/api/cart', function ($router) {
      */
     $router->get('/total', Middleware::run(
         $protected,
-        [CartController::class, 'getTotal']
+        CartController::class,
+        'getTotal'
     ));
 
 });

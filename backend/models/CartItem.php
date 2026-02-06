@@ -18,7 +18,7 @@ require_once __DIR__ . '/Product.php';
 
 class CartItem
 {
-    private PDO $db;
+    public PDO $db;
     private Product $productModel;
 
     /**

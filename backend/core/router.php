@@ -242,6 +242,35 @@ class Router
         return false;
     }
 
+    /**
+     * Group routes with a common prefix
+     *
+     * @param string   $prefix   Route prefix (e.g., '/api/auth')
+     * @param callable $callback Function to define routes within the group
+     */
+    public function group(string $prefix, callable $callback): void
+    {
+        // Create a temporary router for the group
+        $groupRouter = new self();
+        
+        // Execute the callback to register routes
+        $callback($groupRouter);
+        
+        // Register all grouped routes with the prefix
+        foreach ($groupRouter->getRoutes() as $route) {
+            $route['path'] = $prefix . $route['path'];
+            $this->routes[] = $route;
+        }
+    }
+
+    /**
+     * Get all registered routes
+     */
+    public function getRoutes(): array
+    {
+        return $this->routes ?? [];
+    }
+
     /*
      * Typical usage in index.php:
      *

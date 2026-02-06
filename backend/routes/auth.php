@@ -49,6 +49,7 @@ $router->group('/api/auth', function ($router) {
      */
     $router->post('/refresh-token', Middleware::run(
         [new AuthMiddleware()],
+        $router,
         [AuthController::class, 'refreshToken']
     ));
 
@@ -59,6 +60,7 @@ $router->group('/api/auth', function ($router) {
      */
     $router->post('/logout', Middleware::run(
         [new AuthMiddleware()],
+        $router,
         [AuthController::class, 'logout']
     ));
 

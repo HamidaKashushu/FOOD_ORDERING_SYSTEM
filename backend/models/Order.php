@@ -18,7 +18,7 @@ require_once __DIR__ . '/CartItem.php';
 
 class Order
 {
-    private PDO $db;
+    public PDO $db;
 
     /**
      * Constructor - injects or obtains PDO connection
@@ -251,6 +251,52 @@ class Order
         }
 
         return $number;
+    }
+
+    // getAll() method for admin to retrieve all orders with pagination and filters can be added here
+    // e.g. getAll($status = null, $startDate = null, $endDate = null, $page = 1, $perPage = 20)    
+
+    function getAll(): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT o.id, o.order_number, o.total_amount, o.status, o.created_at,
+                   u.full_name AS customer_name
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            ORDER BY o.created_at DESC
+        ");
+
+        $stmt->execute();
+        return $stmt->fetchAll();
+    }
+
+    function getOrdersInRange(string $start, string $end): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT o.id, o.order_number, o.total_amount, o.status, o.created_at,
+                   u.full_name AS customer_name
+            FROM orders o
+            JOIN users u ON o.user_id = u.id
+            WHERE DATE(o.created_at) BETWEEN :start AND :end
+            ORDER BY o.created_at DESC
+        ");
+
+        $stmt->execute([':start' => $start, ':end' => $end]);
+        return $stmt->fetchAll();
+    }
+
+    function getUserOrdersInRange(int $userId, string $start, string $end): array
+    {
+        $stmt = $this->db->prepare("
+            SELECT o.id, o.order_number, o.total_amount, o.status, o.created_at
+            FROM orders o
+            WHERE o.user_id = :user_id
+              AND DATE(o.created_at) BETWEEN :start AND :end
+            ORDER BY o.created_at DESC
+        ");
+
+        $stmt->execute([':user_id' => $userId, ':start' => $start, ':end' => $end]);
+        return $stmt->fetchAll();
     }
 
     /*

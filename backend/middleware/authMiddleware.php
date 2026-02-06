@@ -9,6 +9,7 @@
  * @package FoodOrderingSystem
  * @subpackage Middleware
  */
+
 declare(strict_types=1);
 
 require_once __DIR__ . '/../utils/jwt.php';          // Assuming your JWT helper exists
@@ -36,16 +37,17 @@ class AuthMiddleware extends Middleware
 
         try {
             // Verify and decode JWT
-            $payload = Jwt::verify($token); // Assume Jwt::verify() throws on failure
+            $payload = validateToken($token); // Assume Jwt::verify() throws on failure
 
             if (!isset($payload['sub']) || !is_numeric($payload['sub'])) {
                 return Response::unauthorized('Invalid token payload');
             }
 
             $userId = (int)$payload['sub'];
+            $User = new User();
 
             // Fetch user (you may cache this in production)
-            $user = User::find($userId);
+            $user = $User->findById($userId);
 
             if (!$user || $user['status'] !== 'active') {
                 return Response::unauthorized('User account not found or inactive');

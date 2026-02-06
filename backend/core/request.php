@@ -18,6 +18,8 @@ class Request
     private array $headers = [];
     private ?array $jsonData = null;
 
+    public $user = null; // Authenticated user (set by AuthMiddleware)
+
     /**
      * Constructor - initializes request data safely
      */
