@@ -71,6 +71,27 @@ $router->group('/api/users', function ($router) {
     ));
 
     /**
+     * Create new user (admin only)
+     * POST /api/users
+     */
+    $router->post('/', Middleware::run(
+        $adminMiddleware,
+        [UserController::class, 'createUser']
+    ));
+
+    /**
+     * Update user details (admin only)
+     * PUT /api/users/{id}
+     */
+    $router->put('/{id}', Middleware::run(
+        $adminMiddleware,
+        function (Request $request, int $id) {
+            $controller = new UserController($request);
+            $controller->updateUser($id);
+        }
+    ));
+
+    /**
      * Delete a user by ID (admin only)
      * DELETE /api/users/{id}
      */

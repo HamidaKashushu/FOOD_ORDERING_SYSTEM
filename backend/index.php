@@ -58,6 +58,7 @@ require_once __DIR__ . '/utils/validator.php';
 require_once __DIR__ . '/utils/sanitizer.php';
 require_once __DIR__ . '/utils/jwt.php';
 require_once __DIR__ . '/utils/password.php';
+require_once __DIR__ . '/utils/upload.php';
 
 // Middleware
 require_once __DIR__ . '/middleware/AuthMiddleware.php';
@@ -99,6 +100,7 @@ require_once __DIR__ . '/routes/products.php';
 require_once __DIR__ . '/routes/cart.php';
 require_once __DIR__ . '/routes/orders.php';
 require_once __DIR__ . '/routes/payments.php';
+require_once __DIR__ . '/routes/addresses.php';
 require_once __DIR__ . '/routes/reports.php';
 
 // ────────────────────────────────────────────────

@@ -160,17 +160,24 @@ class CartController
     }
 
     /**
-     * Remove specific item from cart (DELETE /cart/items/{productId})
+     * Remove specific item from cart (DELETE /cart/remove)
      *
-     * @param int $productId Product ID to remove
      * @return never
      */
-    public function removeItem(int $productId): never
+    public function removeItem(): never
     {
         $userId = $this->request->user['id'] ?? 0;
         if ($userId <= 0) {
             Response::unauthorized('Authentication required');
         }
+
+        $data = $this->request->all();
+
+        if (empty($data['product_id'])) {
+             Response::error('Product ID is required', 400);
+        }
+
+        $productId = (int)$data['product_id'];
 
         $success = $this->cartModel->removeItem($userId, $productId);
 

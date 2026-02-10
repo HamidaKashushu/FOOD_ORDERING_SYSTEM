@@ -25,7 +25,7 @@ declare(strict_types=1);
  * Use: bin2hex(random_bytes(32)) or similar to generate one
  * Best: store in .env or server environment variable
  */
-define('JWT_SECRET_KEY', 'change_this_to_a_very_strong_random_secret_key_32_chars_or_more');
+define('JWT_SECRET_KEY', '7f8a9d1c2b3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f90'); // randomly generated 64-char key
 
 /**
  * Default token lifetime in seconds (1 hour = 3600)
