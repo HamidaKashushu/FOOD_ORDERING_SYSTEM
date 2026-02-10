@@ -155,9 +155,96 @@ class ReportController
         Response::success($summary, 'Revenue summary generated');
     }
 
-    // ────────────────────────────────────────────────
-    //  Internal Helper Methods
-    // ────────────────────────────────────────────────
+    /**
+     * Dashboard: Count total users
+     * GET /admin/reports/users-count
+     */
+    public function getUsersCount(): never
+    {
+        $stmt = $this->userModel->db->query("SELECT COUNT(*) as count FROM users WHERE role_id != (SELECT id FROM roles WHERE name='admin')");
+        Response::success($stmt->fetch());
+    }
+
+    /**
+     * Dashboard: Count total orders
+     * GET /admin/reports/orders-count
+     */
+    public function getOrdersCount(): never
+    {
+        $stmt = $this->orderModel->db->query("SELECT COUNT(*) as count FROM orders");
+        Response::success($stmt->fetch());
+    }
+
+    /**
+     * Dashboard: Total revenue
+     * GET /admin/reports/revenue-total
+     */
+    public function getTotalRevenue(): never
+    {
+        $stmt = $this->orderModel->db->query("SELECT COALESCE(SUM(total_amount), 0) as total FROM orders WHERE status = 'completed'");
+        Response::success($stmt->fetch());
+    }
+
+    /**
+     * Dashboard: Total products
+     * GET /admin/reports/products-count
+     */
+    public function getProductsCount(): never
+    {
+        $stmt = $this->productModel->db->query("SELECT COUNT(*) as count FROM products");
+        Response::success($stmt->fetch());
+    }
+
+    /**
+     * Dashboard: Orders trend (last 7 days, for example)
+     * GET /admin/reports/orders-trend
+     */
+    public function getOrdersTrend(): never
+    {
+        // Get last 7 days stats
+        $stmt = $this->orderModel->db->query("
+            SELECT DATE(created_at) as date, COUNT(*) as count 
+            FROM orders 
+            WHERE created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        $rows = $stmt->fetchAll();
+        
+        $labels = [];
+        $values = [];
+        foreach ($rows as $row) {
+            $labels[] = $row['date'];
+            $values[] = (int)$row['count'];
+        }
+
+        Response::success(['labels' => $labels, 'values' => $values]);
+    }
+
+    /**
+     * Dashboard: Revenue trend (last 7 days)
+     * GET /admin/reports/revenue-trend
+     */
+    public function getRevenueTrend(): never
+    {
+        $stmt = $this->orderModel->db->query("
+            SELECT DATE(created_at) as date, SUM(total_amount) as total
+            FROM orders 
+            WHERE status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)
+            GROUP BY DATE(created_at)
+            ORDER BY date ASC
+        ");
+        $rows = $stmt->fetchAll();
+        
+        $labels = [];
+        $values = [];
+        foreach ($rows as $row) {
+            $labels[] = $row['date'];
+            $values[] = (float)$row['total'];
+        }
+
+        Response::success(['labels' => $labels, 'values' => $values]);
+    }
 
     private function validateDateRange(string $start, string $end): bool
     {

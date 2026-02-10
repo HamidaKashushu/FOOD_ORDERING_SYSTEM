@@ -71,6 +71,16 @@ $router->group('/api/reports', function ($router) {
         }
     ));
 
+    // Dashboard Stats
+    $router->get('/users-count',    Middleware::run($adminMiddleware, [ReportController::class, 'getUsersCount']));
+    $router->get('/orders-count',   Middleware::run($adminMiddleware, [ReportController::class, 'getOrdersCount']));
+    $router->get('/revenue-total',  Middleware::run($adminMiddleware, [ReportController::class, 'getTotalRevenue']));
+    $router->get('/products-count', Middleware::run($adminMiddleware, [ReportController::class, 'getProductsCount']));
+
+    // Dashboard Charts
+    $router->get('/orders-trend',   Middleware::run($adminMiddleware, [ReportController::class, 'getOrdersTrend']));
+    $router->get('/revenue-trend',  Middleware::run($adminMiddleware, [ReportController::class, 'getRevenueTrend']));
+
     /**
      * Revenue summary report
      * GET /api/reports/revenue-summary?start=YYYY-MM-DD&end=YYYY-MM-DD

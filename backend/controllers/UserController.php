@@ -137,6 +137,103 @@ class UserController
     }
 
     /**
+     * Create a new user (admin only) - POST /admin/users
+     *
+     * @return never
+     */
+    public function createUser(): never
+    {
+        $data = $this->request->all();
+
+        $errors = validate($data, [
+            'full_name' => 'required|string|min:2|max:120',
+            'email'     => 'required|email',
+            'password'  => 'required|string|min:8',
+            'role'      => 'optional|string',
+            'status'    => 'optional|in:active,blocked'
+        ]);
+
+        if (!empty($errors)) {
+            Response::validation($errors, 'User creation failed');
+        }
+
+        if ($this->userModel->findByEmail($data['email'])) {
+            Response::error('Email already exists', 409);
+        }
+
+        // Get role ID
+        $roleName = $data['role'] ?? 'customer';
+        $role = $this->roleModel->findByName($roleName);
+        if (!$role) {
+            $role = $this->roleModel->findByName('customer');
+        }
+
+        $userData = [
+            'full_name'     => sanitizeString($data['full_name']),
+            'email'         => sanitizeEmail($data['email']),
+            'password_hash' => hashPassword($data['password']),
+            'role_id'       => $role['id'],
+            'status'        => $data['status'] ?? 'active'
+        ];
+
+        if ($this->userModel->create($userData)) {
+            Response::created(['message' => 'User created successfully']);
+        }
+
+        Response::error('Failed to create user', 500);
+    }
+
+    /**
+     * Update any user (admin only) - PUT /admin/users/{id}
+     *
+     * @param int $id User ID
+     * @return never
+     */
+    public function updateUser(int $id): never
+    {
+        $data = $this->request->all(); // Supports PUT/PATCH via form override
+
+        $errors = validate($data, [
+            'full_name' => 'optional|string|min:2|max:120',
+            'email'     => 'optional|email',
+            'role'      => 'optional|string',
+            'status'    => 'optional|in:active,blocked'
+            // Password update by admin can be added if needed, usually omitted here to keep it simple
+        ]);
+
+        if (!empty($errors)) {
+            Response::validation($errors, 'User update failed');
+        }
+
+        $updates = [];
+        if (isset($data['full_name'])) $updates['full_name'] = sanitizeString($data['full_name']);
+        if (isset($data['email'])) $updates['email'] = sanitizeEmail($data['email']);
+        if (isset($data['phone'])) $updates['phone'] = sanitizeString($data['phone']);
+        if (isset($data['status'])) $updates['status'] = $data['status'];
+
+        // Role update
+        if (isset($data['role'])) {
+            $role = $this->roleModel->findByName($data['role']);
+            if ($role) $updates['role_id'] = $role['id'];
+        }
+
+        // Password update (if provided)
+        if (!empty($data['password'])) {
+            $updates['password_hash'] = hashPassword($data['password']);
+        }
+
+        if (empty($updates)) {
+            Response::error('No fields to update', 400);
+        }
+
+        if ($this->userModel->update($id, $updates)) {
+            Response::success(['message' => 'User updated successfully']);
+        }
+
+        Response::error('Failed to update user', 500);
+    }
+
+    /**
      * Delete a user (admin only) - DELETE /admin/users/{id}
      *
      * @param int $userId User ID to delete

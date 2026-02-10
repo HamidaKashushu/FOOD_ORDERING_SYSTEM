@@ -38,7 +38,17 @@ class Order
      * @param array $cartItems Array of cart items from Cart::getCart() or CartItem::getByCartId()
      * @return bool Success status
      */
-    public function create(int $userId, array $cartItems): bool
+    /**
+     * Create a new order from cart items
+     * Uses transaction to ensure atomicity (order + items + payment)
+     *
+     * @param int    $userId        Authenticated user ID
+     * @param array  $cartItems     Array of cart items
+     * @param int    $addressId     Delivery address ID
+     * @param string $paymentMethod Payment method (cash, card, mobile_money)
+     * @return bool Success status
+     */
+    public function create(int $userId, array $cartItems, int $addressId, string $paymentMethod): bool
     {
         if (empty($cartItems)) {
             return false;
@@ -53,6 +63,10 @@ class Order
             return false;
         }
 
+        // Add delivery fee (fixed for now, should be dynamic or passed)
+        $deliveryFee = 2000;
+        $grandTotal = $totalAmount + $deliveryFee;
+
         $orderNumber = $this->generateOrderNumber();
 
         try {
@@ -64,14 +78,10 @@ class Order
                 VALUES (:user_id, :address_id, :total_amount, 'pending')
             ");
 
-            // For simplicity, assume default/first address is used
-            // In real app, pass address_id from request
-            $addressId = 1; // ← Replace with actual logic: $request->body('address_id')
-
             $stmt->execute([
                 ':user_id'      => $userId,
                 ':address_id'   => $addressId,
-                ':total_amount' => $totalAmount
+                ':total_amount' => $grandTotal
             ]);
 
             $orderId = (int)$this->db->lastInsertId();
@@ -94,6 +104,19 @@ class Order
                     ':subtotal'      => $item['subtotal']
                 ]);
             }
+
+            // Create Payment Record
+            // Need Payment model. It is not injected, so instantiate.
+            // Ideally should be injected or used via dependency, but consistent with Cart usage here.
+            require_once __DIR__ . '/Payment.php';
+            $paymentModel = new Payment($this->db);
+            $paymentModel->create([
+                'order_id'       => $orderId,
+                'user_id'        => $userId,
+                'amount'         => $grandTotal,
+                'payment_method' => $paymentMethod,
+                'status'         => 'pending' // default
+            ]);
 
             // Clear user's cart after successful order
             $cartModel = new Cart($this->db);

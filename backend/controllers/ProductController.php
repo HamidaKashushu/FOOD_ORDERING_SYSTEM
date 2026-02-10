@@ -139,12 +139,21 @@ class ProductController
             Response::error('Invalid category ID', 400);
         }
 
+        $imagePath = null;
+        if ($file = $this->request->file('image')) {
+            try {
+                $imagePath = uploadImage($file, 'uploads/products');
+            } catch (Exception $e) {
+                Response::error('Image upload failed: ' . $e->getMessage(), 400);
+            }
+        }
+
         $cleanData = [
             'name'         => sanitizeString($data['name']),
             'description'  => sanitizeString($data['description'] ?? ''),
             'price'        => (float)$data['price'],
             'category_id'  => (int)$data['category_id'],
-            'image'        => sanitizeString($data['image'] ?? null),
+            'image'        => $imagePath, // Store path
             'stock'        => (int)($data['stock'] ?? 0),
             'status'       => $data['status'] ?? 'available'
         ];
@@ -207,8 +216,18 @@ class ProductController
             }
             $cleanData['category_id'] = (int)$data['category_id'];
         }
-        if (array_key_exists('image', $data)) {
-            $cleanData['image'] = sanitizeString($data['image']);
+        if ($file = $this->request->file('image')) {
+            try {
+                $cleanData['image'] = uploadImage($file, 'uploads/products');
+                
+                // Optional: Delete old image if exists (not implemented for simplicity)
+            } catch (Exception $e) {
+                Response::error('Image upload failed: ' . $e->getMessage(), 400);
+            }
+        } elseif (array_key_exists('image', $data) && empty($data['image'])) {
+            // Allow clearing image by sending empty string? Or keep it?
+            // For now, if string 'image' is sent, we sanitize it (maybe URL update?)
+             $cleanData['image'] = sanitizeString($data['image']);
         }
         if (isset($data['stock'])) {
             $cleanData['stock'] = (int)$data['stock'];

@@ -28,6 +28,15 @@ class Request
         // HTTP method
         $this->method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
+        // Method Override (for PUT/PATCH via POST form)
+        if ($this->method === 'POST') {
+            if (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
+                $this->method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+            } elseif (isset($_POST['_method'])) {
+                $this->method = strtoupper($_POST['_method']);
+            }
+        }
+
         // URI without query string
         $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
         $this->uri = rtrim($uri, '/');
@@ -273,6 +282,20 @@ class Request
         return $this->headers;
     }
 
+    /**
+     * Get a file from $_FILES
+     *
+     * @param string $key The key of the file input
+     * @return array|null The file array or null if not found/empty
+     */
+    public function file(string $key): ?array
+    {
+        if (isset($_FILES[$key]) && $_FILES[$key]['error'] !== UPLOAD_ERR_NO_FILE) {
+            return $_FILES[$key];
+        }
+        return null;
+    }
+
     /*
      * Usage example in a controller:
      *
@@ -286,6 +309,12 @@ class Request
      *
      *     $productId = $request->query('id');
      *     $payload = $request->json();
+     *
+     *     // File upload
+     *     $image = $request->file('image');
+     *     if ($image) {
+     *         // process upload
+     *     }
      * }
      */
 }

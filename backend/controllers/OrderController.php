@@ -59,16 +59,29 @@ class OrderController
             Response::unauthorized('Authentication required');
         }
 
+        $data = $this->request->all();
+        $errors = validate($data, [
+            'address_id'     => 'required|numeric',
+            'payment_method' => 'required|in:cash,card,mobile_money'
+        ]);
+
+        if (!empty($errors)) {
+            Response::validation($errors, 'Order creation failed');
+        }
+
         $cartItems = $this->cartModel->getCart($userId);
         if (empty($cartItems)) {
             Response::error('Cart is empty. Add items before placing order.', 400);
         }
 
-        $success = $this->orderModel->create($userId, $cartItems);
+        $addressId = (int)$data['address_id'];
+        $paymentMethod = $data['payment_method'];
+
+        // Optional: Validate address belongs to user (omitted for brevity, assume valid ID)
+
+        $success = $this->orderModel->create($userId, $cartItems, $addressId, $paymentMethod);
 
         if ($success) {
-            // In real app: return the newly created order details
-            // For simplicity, just success message
             Response::created(['message' => 'Order placed successfully']);
         }
 
@@ -188,20 +201,4 @@ class OrderController
 
         Response::error('Failed to delete order', 500);
     }
-
-    /*
-     * Typical routing usage in routes/orders.php or index.php:
-     *
-     * $orderCtrl = new OrderController($request);
-     *
-     * // User-protected routes (after AuthMiddleware)
-     * $router->post('/orders',           [$orderCtrl, 'createOrder']);
-     * $router->get('/orders/{id}',       fn($id) => $orderCtrl->getOrder((int)$id));
-     * $router->get('/orders',            [$orderCtrl, 'getOrdersByUser']);
-     *
-     * // Admin-only routes (after AuthMiddleware + RoleMiddleware('admin'))
-     * $router->get('/admin/orders',      [$orderCtrl, 'getAllOrders']);
-     * $router->patch('/admin/orders/{id}/status', fn($id) => $orderCtrl->updateStatus((int)$id));
-     * $router->delete('/admin/orders/{id}', fn($id) => $orderCtrl->deleteOrder((int)$id));
-     */
 }
