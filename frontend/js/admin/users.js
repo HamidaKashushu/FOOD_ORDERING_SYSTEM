@@ -29,25 +29,25 @@ import { isRequired, isEmail, minLength } from '../utils/validator.js';
 // ────────────────────────────────────────────────
 // DOM Elements
 // ────────────────────────────────────────────────
-const usersTableBody      = document.getElementById('usersBody');
-const addUserBtn          = document.getElementById('addUserBtn');
-const userModal           = document.getElementById('userModal');
-const modalTitle          = document.getElementById('modalTitle');
-const userForm            = document.getElementById('userForm');
-const userIdInput         = document.getElementById('userId');
-const fullNameInput       = document.getElementById('fullName');
-const emailInput          = document.getElementById('email');
-const phoneInput          = document.getElementById('phone');
-const passwordGroup       = document.getElementById('passwordGroup');
-const passwordInput       = document.getElementById('password');
-const roleSelect          = document.getElementById('role');
-const statusSelect        = document.getElementById('status');
-const saveUserBtn         = document.getElementById('saveUserBtn');
-const cancelUserBtn       = document.getElementById('cancelUserBtn');
-const closeModalBtn       = document.getElementById('closeModal');
-const userMessage         = document.getElementById('userMessage');
-const emptyUsers          = document.getElementById('emptyUsers');
-const addFirstUserBtn     = document.getElementById('addFirstUserBtn');
+const usersTableBody = document.getElementById('usersBody');
+const addUserBtn = document.getElementById('addUserBtn');
+const userModal = document.getElementById('userModal');
+const modalTitle = document.getElementById('modalTitle');
+const userForm = document.getElementById('userForm');
+const userIdInput = document.getElementById('userId');
+const fullNameInput = document.getElementById('fullName');
+const emailInput = document.getElementById('email');
+const phoneInput = document.getElementById('phone');
+const passwordGroup = document.getElementById('passwordGroup');
+const passwordInput = document.getElementById('password');
+const roleSelect = document.getElementById('role');
+const statusSelect = document.getElementById('status');
+const saveUserBtn = document.getElementById('saveUserBtn');
+const cancelUserBtn = document.getElementById('cancelUserBtn');
+const closeModalBtn = document.getElementById('closeModal');
+const userMessage = document.getElementById('userMessage');
+const emptyUsers = document.getElementById('emptyUsers');
+const addFirstUserBtn = document.getElementById('addFirstUserBtn');
 
 // ────────────────────────────────────────────────
 // State & Constants
@@ -218,7 +218,7 @@ async function saveUser(event) {
         if (editingUserId) {
             // Update existing user (password optional)
             response = await put(
-                `${API_BASE_URL}${ENDPOINTS.USERS.UPDATE_PROFILE(editingUserId)}`,
+                `${API_BASE_URL}${ENDPOINTS.USERS.UPDATE_USER(editingUserId)}`,
                 userData
             );
         } else {

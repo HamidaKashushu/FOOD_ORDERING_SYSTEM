@@ -31,14 +31,14 @@ import { getItem } from './utils/storage.js';
 // ────────────────────────────────────────────────
 // DOM Elements (global)
 // ────────────────────────────────────────────────
-const menuToggle         = document.getElementById('menuToggle');
-const navMenu            = document.querySelector('.nav-menu');
-const logoutBtn          = document.getElementById('logoutBtn');
-const loginBtn           = document.getElementById('loginBtn');
-const registerBtn        = document.getElementById('registerBtn');
-const cartCountBadge     = document.getElementById('cart-count');
-const profileLink        = document.querySelector('a[href="profile.html"]');
-const ordersLink         = document.querySelector('a[href="orders.html"]');
+const menuToggle = document.getElementById('menuToggle');
+const navMenu = document.querySelector('.nav-menu');
+const logoutBtn = document.getElementById('logoutBtn');
+const loginBtn = document.getElementById('loginBtn');
+const registerBtn = document.getElementById('registerBtn');
+const cartCountBadge = document.getElementById('cart-count');
+const profileLink = document.querySelector('a[href="profile.html"]');
+const ordersLink = document.querySelector('a[href="orders.html"]');
 
 // ────────────────────────────────────────────────
 // Constants
@@ -182,6 +182,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('visibilitychange', () => {
         if (document.visibilityState === 'visible') {
             updateCartCount();
+        }
+    });
+
+    // Listen for custom "add-to-cart" events from other scripts
+    document.addEventListener('add-to-cart', (e) => {
+        if (e.detail && e.detail.productId) {
+            import('./utils/cart.js').then(module => {
+                module.addToCart(e.detail.productId, e.detail.quantity || 1);
+            });
         }
     });
 });

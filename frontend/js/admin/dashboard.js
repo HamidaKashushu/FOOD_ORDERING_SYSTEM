@@ -25,13 +25,13 @@ import { API_BASE_URL, ENDPOINTS } from '../config/api.js';
 // ────────────────────────────────────────────────
 // DOM Elements
 // ────────────────────────────────────────────────
-const totalUsersEl     = document.getElementById('totalUsers');
-const totalOrdersEl    = document.getElementById('totalOrders');
-const totalRevenueEl   = document.getElementById('totalRevenue');
-const totalProductsEl  = document.getElementById('totalProducts');
+const totalUsersEl = document.getElementById('totalUsers');
+const totalOrdersEl = document.getElementById('totalOrders');
+const totalRevenueEl = document.getElementById('totalRevenue');
+const totalProductsEl = document.getElementById('totalProducts');
 
-const ordersChartEl    = document.getElementById('ordersChart');
-const revenueChartEl   = document.getElementById('revenueChart');
+const ordersChartEl = document.getElementById('ordersChart');
+const revenueChartEl = document.getElementById('revenueChart');
 
 const recentOrdersBody = document.getElementById('recentOrdersTable');
 
@@ -75,7 +75,7 @@ function formatDate(dateStr) {
  */
 function toggleLoading(el, show) {
     if (el) {
-        el.innerHTML = show 
+        el.innerHTML = show
             ? '<span class="loading-spinner"></span> Loading...'
             : '';
     }
@@ -93,15 +93,15 @@ async function loadDashboardMetrics() {
         // For simplicity, assuming separate endpoints or a dashboard endpoint
         // You can adjust to your actual API structure
         const [users, orders, revenue, products] = await Promise.all([
-            get(`${API_BASE_URL}/api/reports/users-count`),
-            get(`${API_BASE_URL}/api/reports/orders-count`),
-            get(`${API_BASE_URL}/api/reports/revenue-total`),
-            get(`${API_BASE_URL}/api/reports/products-count`)
+            get(`${API_BASE_URL}${ENDPOINTS.REPORTS.USERS_COUNT}`),
+            get(`${API_BASE_URL}${ENDPOINTS.REPORTS.ORDERS_COUNT}`),
+            get(`${API_BASE_URL}${ENDPOINTS.REPORTS.REVENUE_TOTAL}`),
+            get(`${API_BASE_URL}${ENDPOINTS.REPORTS.PRODUCTS_COUNT}`)
         ]);
 
-        totalUsersEl.textContent    = users?.count || 0;
-        totalOrdersEl.textContent   = orders?.count || 0;
-        totalRevenueEl.textContent  = formatCurrency(revenue?.total || 0);
+        totalUsersEl.textContent = users?.count || 0;
+        totalOrdersEl.textContent = orders?.count || 0;
+        totalRevenueEl.textContent = formatCurrency(revenue?.total || 0);
         totalProductsEl.textContent = products?.count || 0;
 
     } catch (error) {
@@ -115,7 +115,7 @@ async function loadDashboardMetrics() {
  */
 async function loadOrdersTrendChart() {
     try {
-        const data = await get(`${API_BASE_URL}/api/reports/orders-trend`);
+        const data = await get(`${API_BASE_URL}${ENDPOINTS.REPORTS.ORDERS_TREND}`);
 
         if (!data || !data.labels || !data.values) return;
 
@@ -167,7 +167,7 @@ async function loadOrdersTrendChart() {
  */
 async function loadRevenueTrendChart() {
     try {
-        const data = await get(`${API_BASE_URL}/api/reports/revenue-trend`);
+        const data = await get(`${API_BASE_URL}${ENDPOINTS.REPORTS.REVENUE_TREND}`);
 
         if (!data || !data.labels || !data.values) return;
 

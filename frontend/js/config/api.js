@@ -18,7 +18,7 @@
 // 1. API Base URL Configuration
 // ────────────────────────────────────────────────
 // Change this in production to your actual domain
-const API_BASE_URL = 
+const API_BASE_URL =
     window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost/food-ordering-system/backend'
         : 'https://api.dfood.co.tz';  // ← Replace with your production domain
@@ -32,81 +32,90 @@ const API_VERSION = '/api';
 const ENDPOINTS = {
     // Authentication
     AUTH: {
-        LOGIN:     `${API_VERSION}/auth/login`,
-        REGISTER:  `${API_VERSION}/auth/register`,
-        REFRESH:   `${API_VERSION}/auth/refresh-token`,
-        LOGOUT:    `${API_VERSION}/auth/logout`
+        LOGIN: `${API_VERSION}/auth/login`,
+        REGISTER: `${API_VERSION}/auth/register`,
+        REFRESH: `${API_VERSION}/auth/refresh-token`,
+        LOGOUT: `${API_VERSION}/auth/logout`
     },
 
     // Users & Profile
     USERS: {
-        PROFILE:        `${API_VERSION}/users/profile`,
+        PROFILE: `${API_VERSION}/users/profile`,
         UPDATE_PROFILE: `${API_VERSION}/users/profile`,
-        ALL_USERS:      `${API_VERSION}/users`,
-        DELETE_USER:    (id) => `${API_VERSION}/users/${id}`,
-        ASSIGN_ROLE:    (id) => `${API_VERSION}/users/${id}/role`
+        ALL_USERS: `${API_VERSION}/users`,
+        UPDATE_USER: (id) => `${API_VERSION}/users/${id}`,
+        DELETE_USER: (id) => `${API_VERSION}/users/${id}`,
+        ASSIGN_ROLE: (id) => `${API_VERSION}/users/${id}/role`
     },
 
     // Categories
     CATEGORIES: {
-        GET_ALL:    `${API_VERSION}/categories`,
-        GET_ONE:    (id) => `${API_VERSION}/categories/${id}`,
-        CREATE:     `${API_VERSION}/categories`,
-        UPDATE:     (id) => `${API_VERSION}/categories/${id}`,
-        DELETE:     (id) => `${API_VERSION}/categories/${id}`,
-        SEARCH:     (keyword) => `${API_VERSION}/categories/search/${encodeURIComponent(keyword)}`,
-        STATUS:     (id) => `${API_VERSION}/categories/${id}/status`
+        GET_ALL: `${API_VERSION}/categories`,
+        GET_ONE: (id) => `${API_VERSION}/categories/${id}`,
+        CREATE: `${API_VERSION}/categories`,
+        UPDATE: (id) => `${API_VERSION}/categories/${id}`,
+        DELETE: (id) => `${API_VERSION}/categories/${id}`,
+        SEARCH: (keyword) => `${API_VERSION}/categories/search/${encodeURIComponent(keyword)}`,
+        STATUS: (id) => `${API_VERSION}/categories/${id}/status`
     },
 
     // Products
     PRODUCTS: {
-        GET_ALL:       `${API_VERSION}/products`,
-        GET_ONE:       (id) => `${API_VERSION}/products/${id}`,
+        GET_ALL: `${API_VERSION}/products`,
+        GET_ONE: (id) => `${API_VERSION}/products/${id}`,
         GET_BY_CATEGORY: (catId) => `${API_VERSION}/products/category/${catId}`,
-        SEARCH:        (keyword) => `${API_VERSION}/products/search/${encodeURIComponent(keyword)}`,
-        CREATE:        `${API_VERSION}/products`,
-        UPDATE:        (id) => `${API_VERSION}/products/${id}`,
-        DELETE:        (id) => `${API_VERSION}/products/${id}`,
-        STATUS:        (id) => `${API_VERSION}/products/${id}/status`
+        SEARCH: (keyword) => `${API_VERSION}/products/search/${encodeURIComponent(keyword)}`,
+        CREATE: `${API_VERSION}/products`,
+        UPDATE: (id) => `${API_VERSION}/products/${id}`,
+        DELETE: (id) => `${API_VERSION}/products/${id}`,
+        STATUS: (id) => `${API_VERSION}/products/${id}/status`
     },
 
     // Shopping Cart
     CART: {
-        GET_CART:      `${API_VERSION}/cart`,
-        ADD_ITEM:      `${API_VERSION}/cart/add`,
-        UPDATE_ITEM:   `${API_VERSION}/cart/update`,
-        REMOVE_ITEM:   `${API_VERSION}/cart/remove`,
-        CLEAR_CART:    `${API_VERSION}/cart/clear`,
-        GET_TOTAL:     `${API_VERSION}/cart/total`
+        GET_CART: `${API_VERSION}/cart`,
+        ADD_ITEM: `${API_VERSION}/cart/add`,
+        UPDATE_ITEM: `${API_VERSION}/cart/update`,
+        REMOVE_ITEM: `${API_VERSION}/cart/remove`,
+        CLEAR_CART: `${API_VERSION}/cart/clear`,
+        GET_TOTAL: `${API_VERSION}/cart/total`
     },
 
     // Orders
     ORDERS: {
-        CREATE:           `${API_VERSION}/orders`,
-        GET_ONE:          (id) => `${API_VERSION}/orders/${id}`,
-        GET_USER_ORDERS:  `${API_VERSION}/orders/user`,
-        GET_ALL:          `${API_VERSION}/orders`,
-        UPDATE_STATUS:    (id) => `${API_VERSION}/orders/${id}/status`,
-        DELETE:           (id) => `${API_VERSION}/orders/${id}`
+        CREATE: `${API_VERSION}/orders`,
+        GET_ONE: (id) => `${API_VERSION}/orders/${id}`,
+        GET_USER_ORDERS: `${API_VERSION}/orders/user`,
+        GET_ALL: `${API_VERSION}/orders`,
+        UPDATE_STATUS: (id) => `${API_VERSION}/orders/${id}/status`,
+        DELETE: (id) => `${API_VERSION}/orders/${id}`
     },
 
     // Payments
     PAYMENTS: {
-        CREATE:           `${API_VERSION}/payments`,
-        GET_ONE:          (id) => `${API_VERSION}/payments/${id}`,
+        CREATE: `${API_VERSION}/payments`,
+        GET_ONE: (id) => `${API_VERSION}/payments/${id}`,
         GET_USER_PAYMENTS: `${API_VERSION}/payments/user`,
-        GET_BY_ORDER:     (orderId) => `${API_VERSION}/payments/order/${orderId}`,
-        UPDATE_STATUS:    (id) => `${API_VERSION}/payments/${id}/status`,
-        GET_ALL:          `${API_VERSION}/payments`
+        GET_BY_ORDER: (orderId) => `${API_VERSION}/payments/order/${orderId}`,
+        UPDATE_STATUS: (id) => `${API_VERSION}/payments/${id}/status`,
+        GET_ALL: `${API_VERSION}/payments`
     },
 
     // Reports (Admin Only)
     REPORTS: {
-        SALES:             `${API_VERSION}/reports/sales`,
-        ORDERS:            `${API_VERSION}/reports/orders`,
-        POPULAR_PRODUCTS:  `${API_VERSION}/reports/popular-products`,
-        USER_ACTIVITY:     (userId) => `${API_VERSION}/reports/user-activity/${userId}`,
-        REVENUE_SUMMARY:   `${API_VERSION}/reports/revenue-summary`
+        SALES: `${API_VERSION}/reports/sales`,
+        ORDERS: `${API_VERSION}/reports/orders`,
+        POPULAR_PRODUCTS: `${API_VERSION}/reports/popular-products`,
+        USER_ACTIVITY: (userId) => `${API_VERSION}/reports/user-activity/${userId}`,
+        REVENUE_SUMMARY: `${API_VERSION}/reports/revenue-summary`,
+
+        // Dashboard Stats
+        USERS_COUNT: `${API_VERSION}/reports/users-count`,
+        ORDERS_COUNT: `${API_VERSION}/reports/orders-count`,
+        REVENUE_TOTAL: `${API_VERSION}/reports/revenue-total`,
+        PRODUCTS_COUNT: `${API_VERSION}/reports/products-count`,
+        ORDERS_TREND: `${API_VERSION}/reports/orders-trend`,
+        REVENUE_TREND: `${API_VERSION}/reports/revenue-trend`
     }
 };
 

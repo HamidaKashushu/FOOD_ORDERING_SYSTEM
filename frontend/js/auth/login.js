@@ -14,18 +14,18 @@
  */
 
 import { post } from '../utils/fetch.js';
-import { setAuth } from '../utils/storage.js';
+import { setSession } from '../utils/auth.js';
 import { isRequired, isEmail, minLength } from '../utils/validator.js';
 import { API_BASE_URL, ENDPOINTS } from '../config/api.js';
 
 // ────────────────────────────────────────────────
 // DOM Elements
 // ────────────────────────────────────────────────
-const loginForm       = document.getElementById('loginForm');
-const emailInput      = document.getElementById('email');
-const passwordInput   = document.getElementById('password');
-const submitBtn       = document.getElementById('loginBtn');
-const messageDisplay  = document.getElementById('errorMessage');
+const loginForm = document.getElementById('loginForm');
+const emailInput = document.getElementById('email');
+const passwordInput = document.getElementById('password');
+const submitBtn = document.getElementById('loginBtn');
+const messageDisplay = document.getElementById('errorMessage');
 
 // ────────────────────────────────────────────────
 // Form Validation & Submission
@@ -96,7 +96,7 @@ async function handleLogin(event) {
 
         if (response.success) {
             // Store token and user data
-            setAuth(response.token, response.user);
+            setSession(response.token, response.user);
 
             // Redirect based on role
             const user = response.user;

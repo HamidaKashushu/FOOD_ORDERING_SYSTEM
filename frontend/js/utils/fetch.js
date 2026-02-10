@@ -36,9 +36,13 @@ function getAuthToken() {
  */
 async function request(url, method = 'GET', data = null, customHeaders = {}) {
     const headers = {
-        'Content-Type': 'application/json',
         ...customHeaders
     };
+
+    // Only set JSON content type if not sending FormData
+    if (!(data instanceof FormData)) {
+        headers['Content-Type'] = 'application/json';
+    }
 
     // Automatically add Authorization header if token exists
     const token = getAuthToken();
@@ -54,7 +58,7 @@ async function request(url, method = 'GET', data = null, customHeaders = {}) {
 
     // Add body for methods that support it
     if (data && ['POST', 'PUT', 'PATCH'].includes(method.toUpperCase())) {
-        config.body = JSON.stringify(data);
+        config.body = (data instanceof FormData) ? data : JSON.stringify(data);
     }
 
     try {

@@ -29,26 +29,26 @@ import { isRequired, isNumber, minLength } from '../utils/validator.js';
 // ────────────────────────────────────────────────
 // DOM Elements
 // ────────────────────────────────────────────────
-const productsTableBody   = document.getElementById('productsBody');
-const addProductBtn       = document.getElementById('addProductBtn');
-const productModal        = document.getElementById('productModal');
-const modalTitle          = document.getElementById('modalTitle');
-const productForm         = document.getElementById('productForm');
-const productIdInput      = document.getElementById('productId');
-const productNameInput    = document.getElementById('productName');
-const productDescInput    = document.getElementById('productDescription');
-const productPriceInput   = document.getElementById('productPrice');
+const productsTableBody = document.getElementById('productsBody');
+const addProductBtn = document.getElementById('addProductBtn');
+const productModal = document.getElementById('productModal');
+const modalTitle = document.getElementById('modalTitle');
+const productForm = document.getElementById('productForm');
+const productIdInput = document.getElementById('productId');
+const productNameInput = document.getElementById('productName');
+const productDescInput = document.getElementById('productDescription');
+const productPriceInput = document.getElementById('productPrice');
 const productCategorySelect = document.getElementById('productCategory');
-const productStockInput   = document.getElementById('productStock');
+const productStockInput = document.getElementById('productStock');
 const productStatusSelect = document.getElementById('productStatus');
-const productImageInput   = document.getElementById('productImage');
-const imagePreview        = document.getElementById('imagePreview');
-const saveProductBtn      = document.getElementById('saveProductBtn');
-const cancelProductBtn    = document.getElementById('cancelProductBtn');
-const closeModalBtn       = document.getElementById('closeModal');
-const productMessage      = document.getElementById('productMessage');
-const emptyProducts       = document.getElementById('emptyProducts');
-const addFirstProductBtn  = document.getElementById('addFirstProductBtn');
+const productImageInput = document.getElementById('productImage');
+const imagePreview = document.getElementById('imagePreview');
+const saveProductBtn = document.getElementById('saveProductBtn');
+const cancelProductBtn = document.getElementById('cancelProductBtn');
+const closeModalBtn = document.getElementById('closeModal');
+const productMessage = document.getElementById('productMessage');
+const emptyProducts = document.getElementById('emptyProducts');
+const addFirstProductBtn = document.getElementById('addFirstProductBtn');
 
 // ────────────────────────────────────────────────
 // State & Constants
@@ -254,15 +254,17 @@ async function saveProduct(event) {
 
         if (editingProductId) {
             // Update existing product
-            response = await put(
+            // NOTE: Using POST with _method=PUT override because PHP doesn't parse multipart/form-data on PUT requests
+            formData.append('_method', 'PUT');
+            response = await post(
                 `${API_BASE_URL}${ENDPOINTS.PRODUCTS.UPDATE(editingProductId)}`,
-                productData
+                formData
             );
         } else {
             // Create new product
             response = await post(
                 `${API_BASE_URL}${ENDPOINTS.PRODUCTS.CREATE}`,
-                productData
+                formData
             );
         }
 
