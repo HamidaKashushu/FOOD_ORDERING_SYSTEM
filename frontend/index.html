@@ -3,178 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Order delicious food online from your favorite restaurants in Dar es Salaam. Fast delivery, great taste!">
-    <meta name="keywords" content="food delivery, online ordering, restaurant, Dar es Salaam, Tanzania">
-    <meta name="author" content="Food Ordering System">
-    
-    <title>Food Ordering System</title>
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="assets/images/favicon.png">
-    
+    <title>D-FOOD | Authentic Tanzanian Cuisine</title>
+    <link rel="stylesheet" href="assets/css/style.css">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/menu.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Header / Navigation -->
-    <header class="header">
-        <div class="container header-container">
-            <div class="logo">
-                <a href="index.html">
-                    <img src="assets/images/logo.png" alt="Food Ordering System Logo" class="logo-img">
-                    <span class="logo-text">D FOOD</span>
-                </a>
-            </div>
-
-            <nav class="navbar">
-                <ul class="nav-menu">
-                    <li><a href="#home" class="nav-link active">Home</a></li>
-                    <li><a href="#menu" class="nav-link">Menu</a></li>
-                    <li><a href="cart.html" class="nav-link">Cart <span id="cart-count" class="cart-badge">0</span></a></li>
-                    <li><a href="orders.html" class="nav-link">Orders</a></li>
-                    <li><a href="profile.html" class="nav-link">Profile</a></li>
+    <div id="toast-container"></div>
+    
+    <header class="navbar">
+        <div class="container">
+            <a href="#" class="logo" data-link>D-FOOD</a>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#/" data-link>Home</a></li>
+                    <li><a href="#/menu" data-link>Menu</a></li>
+                    <li id="auth-links">
+                        <a href="#/login" data-link>Login</a>
+                        <a href="#/register" data-link class="btn btn-primary sm">Register</a>
+                    </li>
+                    <li id="user-links" style="display: none;">
+                        <a href="#/cart" data-link>Cart <span id="cart-count" class="badge">0</span></a>
+                        <a href="#/orders" data-link>My Orders</a>
+                        <a href="#" id="logout-btn">Logout</a>
+                    </li>
+                    <li id="admin-links" style="display: none;">
+                        <a href="#/admin" data-link class="btn btn-warning sm">Admin Panel</a>
+                    </li>
                 </ul>
-
-                <div class="auth-buttons">
-                    <a href="login.html" class="btn btn-outline" id="loginBtn">Login</a>
-                    <a href="register.html" class="btn btn-primary" id="registerBtn">Register</a>
-                    <button class="btn btn-danger logout-btn" id="logoutBtn" style="display: none;">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+                <div class="hamburger">
+                    <span></span><span></span><span></span>
                 </div>
-
-                <button class="menu-toggle" id="menuToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
             </nav>
         </div>
     </header>
 
-    <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container hero-container">
-            <div class="hero-content">
-                <h1>Delicious Food Delivered To Your Door</h1>
-                <p>Order from your favorite restaurants in Dar es Salaam. Fast delivery, great taste, every time.</p>
-                
-                <div class="hero-cta">
-                    <a href="#menu" class="btn btn-lg btn-primary">View Menu</a>
-                    <a href="cart.html" class="btn btn-lg btn-outline">Go to Cart</a>
-                </div>
-            </div>
+    <main id="app" class="container">
+        <!-- Dynamic Content will be loaded here -->
+        <div class="loader">Loading...</div>
+    </main>
 
-            <div class="hero-image">
-                <img src="assets/images/hero-food.png" alt="Delicious food delivery">
-            </div>
-        </div>
-    </section>
-
-    <!-- Categories Section -->
-    <section id="categories" class="section categories-section">
+    <footer>
         <div class="container">
-            <h2 class="section-title">Browse by Category</h2>
-            
-            <div class="categories-grid" id="categoriesGrid">
-                <!-- Categories will be loaded here via JavaScript -->
-                <div class="loading">Loading categories...</div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Featured Products Section -->
-    <section id="menu" class="section menu-section">
-        <div class="container">
-            <h2 class="section-title">Featured Products</h2>
-            
-            <div class="products-grid" id="featuredProducts">
-                <!-- Products will be loaded here via JavaScript -->
-                <div class="loading">Loading featured products...</div>
-            </div>
-
-            <div class="text-center mt-5">
-                <a href="menu.html" class="btn btn-primary btn-lg">View Full Menu</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Cart Preview (Floating Mini Cart) -->
-    <div class="mini-cart" id="miniCart">
-        <div class="mini-cart-header">
-            <h3>Your Cart</h3>
-            <span class="cart-count" id="miniCartCount">0</span>
-        </div>
-        
-        <div class="mini-cart-items" id="miniCartItems">
-            <!-- Cart items loaded here -->
-        </div>
-        
-        <div class="mini-cart-footer">
-            <div class="mini-cart-total">
-                <span>Total:</span>
-                <strong id="miniCartTotal">TZS 0.00</strong>
-            </div>
-            <a href="cart.html" class="btn btn-primary btn-block">View Cart & Checkout</a>
-        </div>
-    </div>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>D FOOD</h3>
-                    <p>Fast & reliable food delivery in Dar es Salaam. Order your favorites today!</p>
-                </div>
-                
-                <div class="footer-col">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#menu">Menu</a></li>
-                        <li><a href="cart.html">Cart</a></li>
-                        <li><a href="orders.html">Orders</a></li>
-                        <li><a href="profile.html">Profile</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-col">
-                    <h4>Contact Us</h4>
-                    <ul>
-                        <li><i class="fas fa-phone"></i> +255 123 456 789</li>
-                        <li><i class="fas fa-envelope"></i> support@dfood.co.tz</li>
-                        <li><i class="fas fa-map-marker-alt"></i> Dar es Salaam, Tanzania</li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <p>&copy; <?php echo date('Y'); ?> D FOOD. All rights reserved.</p>
-                <div class="social-links">
-                    <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                    <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                    <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                </div>
-            </div>
+            <p>&copy; 2026 D-FOOD Tanzania. All rights reserved.</p>
         </div>
     </footer>
 
     <!-- Scripts -->
-    <script src="js/config/api.js"></script>
-    <script src="js/utils/fetch.js"></script>
-    <script src="js/utils/storage.js"></script>
-    <script src="js/utils/auth.js"></script>
-    <script src="js/main.js"></script>
-    <script src="js/home.js"></script>
+    <script src="assets/js/api.js"></script>
+    <script src="assets/js/app.js"></script>
 </body>
 </html>

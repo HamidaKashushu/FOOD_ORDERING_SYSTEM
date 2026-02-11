@@ -1,190 +1,83 @@
--- =========================================================
--- FOOD ORDERING SYSTEM DATABASE SCHEMA (MySQL)
+-- Database Schema for D-FOOD
 -- Normalized to 3NF
--- =========================================================
 
-DROP DATABASE IF EXISTS food_ordering_system;
-CREATE DATABASE food_ordering_system;
-USE food_ordering_system;
+CREATE DATABASE IF NOT EXISTS d_food;
+USE d_food;
 
--- =========================================================
--- ROLES
--- =========================================================
-CREATE TABLE roles (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL UNIQUE, -- admin, customer
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- =========================================================
--- USERS
--- =========================================================
-CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    role_id INT NOT NULL,
-    full_name VARCHAR(120) NOT NULL,
-    email VARCHAR(150) NOT NULL UNIQUE,
-    phone VARCHAR(20),
+-- 1. Users Table
+CREATE TABLE IF NOT EXISTS users (
+    user_id INT AUTO_INCREMENT PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
-    status ENUM('active','blocked') DEFAULT 'active',
+    phone_number VARCHAR(15),
+    role ENUM('customer', 'admin') DEFAULT 'customer',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_user_role
-        FOREIGN KEY (role_id) REFERENCES roles(id)
-        ON DELETE RESTRICT
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- =========================================================
--- ADDRESSES (one user can have multiple)
--- =========================================================
-CREATE TABLE addresses (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    street VARCHAR(150) NOT NULL,
-    city VARCHAR(100) NOT NULL,
-    region VARCHAR(100),
-    notes VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_address_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
-);
-
--- =========================================================
--- CATEGORIES
--- =========================================================
-CREATE TABLE categories (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(100) NOT NULL UNIQUE,
+-- 2. Categories Table
+CREATE TABLE IF NOT EXISTS categories (
+    category_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
     description TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- =========================================================
--- PRODUCTS (FOOD ITEMS)
--- =========================================================
-CREATE TABLE products (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+-- 3. Products Table
+CREATE TABLE IF NOT EXISTS products (
+    product_id INT AUTO_INCREMENT PRIMARY KEY,
     category_id INT NOT NULL,
-    name VARCHAR(150) NOT NULL,
+    name VARCHAR(100) NOT NULL,
     description TEXT,
-    price DECIMAL(10,2) NOT NULL,
-    image VARCHAR(255),
-    stock INT DEFAULT 0,
-    status ENUM('available','unavailable') DEFAULT 'available',
+    price DECIMAL(10, 2) NOT NULL, -- TZS
+    image_path VARCHAR(255), -- Path relative to backend/uploads/products/
+    is_available BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_product_category
-        FOREIGN KEY (category_id) REFERENCES categories(id)
-        ON DELETE RESTRICT
+    FOREIGN KEY (category_id) REFERENCES categories(category_id) ON DELETE CASCADE
 );
 
--- =========================================================
--- CART (one active cart per user)
--- =========================================================
-CREATE TABLE carts (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL UNIQUE,
+-- 4. Orders Table
+CREATE TABLE IF NOT EXISTS orders (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    total_amount DECIMAL(10, 2) NOT NULL,
+    status ENUM('pending', 'processing', 'completed', 'cancelled') DEFAULT 'pending',
+    delivery_address TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_cart_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE CASCADE
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
--- =========================================================
--- CART ITEMS
--- =========================================================
-CREATE TABLE cart_items (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    cart_id INT NOT NULL,
+-- 5. Order Items Table (Pivot for Many-to-Many between Orders and Products)
+CREATE TABLE IF NOT EXISTS order_items (
+    order_item_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
     product_id INT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
-    price_at_time DECIMAL(10,2) NOT NULL,
-
-    CONSTRAINT fk_cartitem_cart
-        FOREIGN KEY (cart_id) REFERENCES carts(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_cartitem_product
-        FOREIGN KEY (product_id) REFERENCES products(id)
-        ON DELETE RESTRICT,
-
-    UNIQUE(cart_id, product_id)
+    unit_price DECIMAL(10, 2) NOT NULL, -- Price at time of order
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE,
+    FOREIGN KEY (product_id) REFERENCES products(product_id) ON DELETE CASCADE
 );
 
--- =========================================================
--- ORDERS
--- =========================================================
-CREATE TABLE orders (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    address_id INT NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    status ENUM('pending','preparing','delivering','completed','cancelled') DEFAULT 'pending',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_order_user
-        FOREIGN KEY (user_id) REFERENCES users(id)
-        ON DELETE RESTRICT,
-
-    CONSTRAINT fk_order_address
-        FOREIGN KEY (address_id) REFERENCES addresses(id)
-        ON DELETE RESTRICT
+-- 6. Payments Table (To satisfy 6 tables requirement and separate payment concerns)
+CREATE TABLE IF NOT EXISTS payments (
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL UNIQUE,
+    payment_method ENUM('cash_on_delivery', 'mobile_money', 'card') DEFAULT 'cash_on_delivery',
+    payment_status ENUM('pending', 'paid', 'failed') DEFAULT 'pending',
+    transaction_reference VARCHAR(100), -- For mobile money IDs etc.
+    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(order_id) ON DELETE CASCADE
 );
 
--- =========================================================
--- ORDER ITEMS
--- =========================================================
-CREATE TABLE order_items (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    product_id INT NOT NULL,
-    quantity INT NOT NULL,
-    price_at_time DECIMAL(10,2) NOT NULL,
-    subtotal DECIMAL(10,2) NOT NULL,
+-- Seed Data (Optional, for testing)
+INSERT INTO categories (name, description) VALUES 
+('Swahili Dishes', 'Traditional Tanzanian cuisine'),
+('Fast Food', 'Burgers, Chips, and more'),
+('Drinks', 'Refreshing beverages');
 
-    CONSTRAINT fk_orderitem_order
-        FOREIGN KEY (order_id) REFERENCES orders(id)
-        ON DELETE CASCADE,
-
-    CONSTRAINT fk_orderitem_product
-        FOREIGN KEY (product_id) REFERENCES products(id)
-        ON DELETE RESTRICT
-);
-
--- =========================================================
--- PAYMENTS
--- =========================================================
-CREATE TABLE payments (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    order_id INT NOT NULL,
-    method ENUM('cash','card','mobile_money') NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    status ENUM('pending','paid','failed') DEFAULT 'pending',
-    transaction_ref VARCHAR(150),
-    paid_at TIMESTAMP NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT fk_payment_order
-        FOREIGN KEY (order_id) REFERENCES orders(id)
-        ON DELETE CASCADE
-);
-
--- =========================================================
--- INDEXES (performance)
--- =========================================================
-CREATE INDEX idx_user_email ON users(email);
-CREATE INDEX idx_product_name ON products(name);
-CREATE INDEX idx_order_user ON orders(user_id);
-CREATE INDEX idx_order_status ON orders(status);
-
--- =========================================================
--- DEFAULT SEED DATA
--- =========================================================
-INSERT INTO roles (name) VALUES
-('admin'),
-('customer');
+-- Admin User (Password: admin123) - hash generated via PHP password_hash('admin123', PASSWORD_DEFAULT)
+-- You must generate a real hash in the application setup, this is a placeholder example
+-- INSERT INTO users (full_name, email, password_hash, role) VALUES ('Admin User', 'admin@dfood.com', '$2y$10$YourHashedPasswordHere', 'admin');
